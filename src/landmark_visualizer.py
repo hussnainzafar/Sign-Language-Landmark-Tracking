@@ -41,11 +41,10 @@ class LandmarkVisualizer:
     
     def visualize_landmarks(self, landmarks_data):
         """
-        Visualize landmarks in 3D
-        
-        Args:
-            landmarks_data: Dictionary containing landmark data for each frame
-        """
+    Visualize the landmarks in a 3D PyVista plot.
+    Initializes the scene and slider for navigating through frames.
+    Displays the first valid frame and updates as user slides.
+    """
         # Create a PyVista plotter
         plotter = pv.Plotter()
         plotter.set_background("black")
@@ -93,7 +92,11 @@ class LandmarkVisualizer:
         plotter.show()
     
     def _setup_visualization(self, plotter, frame):
-        """Set up the initial visualization"""
+        
+    #Set up the 3D view with camera, axes, and initial frame.
+    #Uses the first valid frame to visualize landmarks.
+    #Enables trackball interaction for better view control.
+
         self._visualize_frame(plotter, frame)
         
         # Set up camera
@@ -110,7 +113,11 @@ class LandmarkVisualizer:
         plotter.enable_trackball_style()
     
     def _visualize_frame(self, plotter, frame):
-        """Visualize a single frame"""
+    
+    # Visualizes a single frame's landmarks (pose, hands, face).
+    # Calls helper functions to draw each body part if available.
+    # Also adds hand orientation axes if data is present.
+    
         # Visualize pose landmarks
         if frame.get("pose_landmarks"):
             self._visualize_pose(plotter, frame["pose_landmarks"])
@@ -144,7 +151,9 @@ class LandmarkVisualizer:
             )
     
     def _visualize_pose(self, plotter, pose_landmarks):
-        """Visualize pose landmarks"""
+    #      Visualizes the body pose landmarks in 3D.
+    # Adds point cloud and lines for body joint connections.
+    # Scales and centers the pose data for consistent display.
         # Extract points
         points = np.array([
             [landmark["x"], landmark["y"], landmark["z"]]
@@ -165,7 +174,9 @@ class LandmarkVisualizer:
                 plotter.add_mesh(line, color=self.colors["pose"], line_width=3)
     
     def _visualize_hand(self, plotter, hand_landmarks, is_left=True):
-        """Visualize hand landmarks"""
+    #      Draws the hand landmarks with finger and palm connections.
+    # Selects color based on left or right hand.
+    # Centers and scales the points for 3D visualization.
         # Extract points
         points = np.array([
             [landmark["x"], landmark["y"], landmark["z"]]
@@ -187,7 +198,9 @@ class LandmarkVisualizer:
                 plotter.add_mesh(line, color=color, line_width=2)
     
     def _visualize_face(self, plotter, face_landmarks):
-        """Visualize face landmarks"""
+    #      Plots 3D face landmarks as a point cloud.
+    # No connections—just individual landmark dots.
+    # Scales and centers points for correct positioning.
         # Extract points
         points = np.array([
             [landmark["x"], landmark["y"], landmark["z"]]
@@ -202,7 +215,9 @@ class LandmarkVisualizer:
         plotter.add_points(point_cloud, color=self.colors["face"], point_size=5)
     
     def _visualize_hand_orientation(self, plotter, hand_landmarks, orientation, is_left=True):
-        """Visualize hand orientation using axes"""
+    #      Normalizes points by centering them around origin.
+    # Scales points based on max distance to keep visuals consistent.
+    # Ensures that different body parts fit well in the same 3D scene.
         # Get wrist position
         wrist_pos = np.array([
             hand_landmarks[0]["x"],
