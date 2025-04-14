@@ -1,0 +1,14 @@
+# Sign Language Landmark Tracker Requirements
+
+# Core libraries
+opencv-python>=4.5.0
+numpy>=1.20.0
+mediapipe>=0.8.10
+python-dotenv>=0.19.0
+
+# 3D Visualization
+pyvista>=0.32.0
+transforms3d>=0.3.1
+
+# Utilities
+tqdm>=4.62.0
