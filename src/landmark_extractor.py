@@ -7,8 +7,36 @@ from .utils.depth_filter import DepthFilter
 from .utils.orientation_calculator import OrientationCalculator
 
 class LandmarkExtractor:
+    """
+    Extracts landmarks (pose, hands, face) from video frames using the MediaPipe Holistic model.
+
+    Attributes:
+        mp_holistic (mediapipe.solutions.holistic): MediaPipe Holistic model used for landmark extraction.
+        mp_drawing (mediapipe.solutions.drawing_utils): Utilities for drawing landmarks on images.
+        mp_drawing_styles (mediapipe.solutions.drawing_styles): Default styles for landmark drawing.
+        depth_filter (DepthFilter): Custom depth filter used to smooth landmark coordinates.
+        orientation_calculator (OrientationCalculator): Custom tool to calculate hand orientations.
+
+    Methods:
+        process_video(video_path: str, show_video: bool = False) -> dict:
+            Processes the video frame by frame to extract landmarks and optionally displays the video.
+        _extract_frame_landmarks(results: mediapipe.framework.formats.landmark_pb2.LandmarkList, frame_idx: int) -> dict:
+            Extracts landmarks from a single frame and calculates hand orientations.
+        _process_pose_landmarks(landmarks: mediapipe.framework.formats.landmark_pb2.LandmarkList) -> list:
+            Processes pose landmarks and returns a list of x, y, z, and visibility values.
+        _process_hand_landmarks(landmarks: mediapipe.framework.formats.landmark_pb2.LandmarkList) -> list:
+            Processes hand landmarks and returns a list of x, y, z coordinates.
+        _process_face_landmarks(landmarks: mediapipe.framework.formats.landmark_pb2.LandmarkList) -> list:
+            Selects and processes specific important face landmarks.
+        _draw_landmarks(image: numpy.ndarray, results: mediapipe.framework.formats.landmark_pb2.LandmarkList):
+            Draws the landmarks on the given image for visual display.
+    """
+    
     def __init__(self):
-        # Initializes MediaPipe Holistic model, drawing utilities, and custom tools
+        """
+        Initializes the necessary components for landmark extraction, including MediaPipe Holistic model, 
+        drawing utilities, and custom tools for depth filtering and orientation calculation.
+        """
         self.mp_holistic = mp.solutions.holistic
         self.mp_drawing = mp.solutions.drawing_utils
         self.mp_drawing_styles = mp.solutions.drawing_styles
@@ -20,7 +48,13 @@ class LandmarkExtractor:
         """
         Processes a video frame by frame to extract landmarks using MediaPipe Holistic.
         Optionally displays the video with drawn landmarks.
-        Returns all the extracted data along with video metadata.
+
+        Args:
+            video_path (str): Path to the video file to process.
+            show_video (bool, optional): Whether to display the video with drawn landmarks. Defaults to False.
+
+        Returns:
+            dict: A dictionary containing metadata about the video and the extracted landmarks for each frame.
         """
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
@@ -40,7 +74,6 @@ class LandmarkExtractor:
             "frames": []
         }
         
-        # Initializes the MediaPipe Holistic model and processes each video frame
         with self.mp_holistic.Holistic(
             min_detection_confidence=0.5,
             min_tracking_confidence=0.5,
@@ -54,11 +87,9 @@ class LandmarkExtractor:
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 results = holistic.process(frame_rgb)
                 
-                # Extracts landmark data from the current frame
                 frame_data = self._extract_frame_landmarks(results, frame_idx)
                 landmarks_data["frames"].append(frame_data)
                 
-                # Optionally displays the video with drawn landmarks
                 if show_video:
                     self._draw_landmarks(frame, results)
                     cv2.imshow('MediaPipe Holistic', frame)
@@ -69,7 +100,6 @@ class LandmarkExtractor:
         if show_video:
             cv2.destroyAllWindows()
         
-        # Applies depth filtering to smoothen landmark coordinates
         landmarks_data = self.depth_filter.process_sequence(landmarks_data)
         return landmarks_data
 
@@ -77,6 +107,13 @@ class LandmarkExtractor:
         """
         Extracts all types of landmarks (pose, hands, face) from a single frame.
         Also calculates hand orientation if hand landmarks are detected.
+
+        Args:
+            results (mediapipe.framework.formats.landmark_pb2.LandmarkList): The landmarks detected in the current frame.
+            frame_idx (int): The index of the current frame in the video.
+
+        Returns:
+            dict: A dictionary containing landmarks for pose, hands, and face, as well as hand orientation data.
         """
         frame_data = {
             "frame_idx": frame_idx,
@@ -101,7 +138,13 @@ class LandmarkExtractor:
     def _process_pose_landmarks(self, landmarks):
         """
         Processes pose landmarks and returns a list of x, y, z, and visibility values.
-        Returns None if no landmarks are detected.
+
+        Args:
+            landmarks (mediapipe.framework.formats.landmark_pb2.LandmarkList): The pose landmarks detected in the current frame.
+
+        Returns:
+            list: A list of dictionaries containing x, y, z, and visibility values for each pose landmark.
+            None: If no pose landmarks are detected.
         """
         if not landmarks:
             return None
@@ -120,7 +163,13 @@ class LandmarkExtractor:
     def _process_hand_landmarks(self, landmarks):
         """
         Processes hand landmarks and returns a list of x, y, z coordinates.
-        Returns None if no landmarks are detected.
+
+        Args:
+            landmarks (mediapipe.framework.formats.landmark_pb2.LandmarkList): The hand landmarks detected in the current frame.
+
+        Returns:
+            list: A list of dictionaries containing x, y, z coordinates for each hand landmark.
+            None: If no hand landmarks are detected.
         """
         if not landmarks:
             return None
@@ -138,7 +187,13 @@ class LandmarkExtractor:
     def _process_face_landmarks(self, landmarks):
         """
         Selects and processes specific important face landmarks.
-        Returns a list of selected landmark coordinates or None if not detected.
+
+        Args:
+            landmarks (mediapipe.framework.formats.landmark_pb2.LandmarkList): The face landmarks detected in the current frame.
+
+        Returns:
+            list: A list of dictionaries containing x, y, z coordinates for important face landmarks.
+            None: If no face landmarks are detected.
         """
         if not landmarks:
             return None
@@ -168,7 +223,13 @@ class LandmarkExtractor:
     def _draw_landmarks(self, image, results):
         """
         Draws pose and hand landmarks on the image using MediaPipe drawing tools.
-        Used for visual display when show_video is enabled.
+
+        Args:
+            image (numpy.ndarray): The image frame on which landmarks are drawn.
+            results (mediapipe.framework.formats.landmark_pb2.LandmarkList): The landmarks detected in the current frame.
+
+        Returns:
+            None
         """
         self.mp_drawing.draw_landmarks(
             image,
