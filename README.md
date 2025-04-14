@@ -40,7 +40,7 @@ cd Sign-Language-Landmark-Tracking
 
 2. Create and activate a conda environment (recommended):
 ```bash
-conda create --name sign_tracker python=3.10
+conda create --name sign_tracker python=3.12
 conda activate sign_tracker
 ```
 
@@ -67,7 +67,44 @@ This will:
 2. Extract landmarks using MediaPipe
 3. Calculate hand orientations
 4. Save the results as JSON files in the `output` directory
-5. Visualize the landmarks in an interactive 3D viewer
+5. Visualize the landmarks in an interactive 3D viewer (falls back to 2D if 3D fails)
+
+### Command-Line Options
+
+The application supports several command-line options for flexibility:
+
+```bash
+# Use the simpler 2D matplotlib visualizer (for systems with OpenGL issues)
+python main.py --simple
+
+# Process without any visualization
+python main.py --no-vis
+
+# Disable the video preview during processing
+python main.py --no-show
+
+# Process a specific video file instead of all files in the data directory
+python main.py --file path/to/your/video.mp4
+
+# Combine options as needed
+python main.py --simple --file path/to/your/video.mp4
+```
+
+### Platform-Specific Notes
+
+#### Linux/Ubuntu
+On Linux systems, you might encounter OpenGL rendering issues with the 3D visualization. Options to resolve this:
+
+1. Install necessary OpenGL libraries:
+   ```bash
+   sudo apt-get update
+   sudo apt-get install -y libgl1-mesa-glx libgl1-mesa-dev xvfb libxrender1 mesa-utils
+   ```
+
+2. Use the simple 2D visualizer instead:
+   ```bash
+   python main.py --simple
+   ```
 
 ### Processing a Single Video
 
@@ -118,11 +155,19 @@ The system generates JSON files with the following structure:
 
 ## Visualization Controls
 
+### 3D PyVista Visualization
 In the 3D visualization window:
 - **Mouse drag**: Rotate the view
 - **Scroll wheel**: Zoom in/out
 - **Frame slider**: Navigate through video frames
 - **Middle mouse button + drag**: Pan the view
+
+### 2D Matplotlib Visualization
+In the 2D visualization window:
+- **Frame slider**: Navigate through video frames
+- **Pan/Zoom buttons**: Standard matplotlib navigation controls
+- **Left view**: 2D front view (X-Y plane)
+- **Right view**: 3D perspective view with rotation controls
 
 ## Contributing
 
