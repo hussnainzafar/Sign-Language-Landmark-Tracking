@@ -4,9 +4,20 @@ from matplotlib.animation import FuncAnimation
 
 class SimpleVisualizer:
     """
-    A simple 2D visualizer using Matplotlib
+    A simple 2D and 3D visualizer using Matplotlib to display body pose,
+    hand landmarks, and face landmarks over time.
     """
     def __init__(self):
+        """
+        Initializes the visualizer by setting up necessary configurations.
+
+        This includes:
+        - Defining colors for different landmarks (pose, left hand, right hand, face).
+        - Setting up connections for body pose and hand landmarks.
+        
+    
+        """
+
         self.colors = {
             "pose": "white",
             "left_hand": "red",
@@ -40,11 +51,17 @@ class SimpleVisualizer:
     
     def visualize_landmarks(self, landmarks_data):
         """
-        Visualize landmarks using matplotlib
-        
+        Visualizes the landmarks (pose, hands, and face) for each frame over time.
+        The frames in the dictionary must contain:
+        - "pose_landmarks": list of pose landmarks for each frame.
+        - "left_hand_landmarks": list of left hand landmarks for each frame.
+        - "right_hand_landmarks": list of right hand landmarks for each frame.
+        - "face_landmarks": list of face landmarks for each frame.
+
         Args:
-            landmarks_data: Dictionary containing landmark data for each frame
-        """
+        landmarks_data (dict): A dictionary containing the frames of landmark data.
+         """
+
         frames = landmarks_data["frames"]
         if not frames:
             print("No frames to visualize")
@@ -71,7 +88,16 @@ class SimpleVisualizer:
         current_frame = [0]
         
         def update(frame_idx):
-            """Update the visualization for the given frame index"""
+            """
+            Updates the visualization for each frame based on the current index.
+            This function clears the previous plot and redraws the new frame.
+            
+            Args:
+            frame_idx (int): The index of the frame to be visualized.
+            
+            Returns:
+            tuple: The updated axes for 2D and 3D views (ax1, ax2).
+            """
             ax1.clear()
             ax2.clear()
             
@@ -107,6 +133,14 @@ class SimpleVisualizer:
                         valinit=0, valstep=1, valfmt='%d')
         
         def update_slider(val):
+            """
+            Handles the interaction with the slider to update the frame displayed
+            based on the selected value.
+            This function calls the update function to redraw the frame.
+            
+            Args:
+            val (float): The current value of the slider, used to update the frame index.
+            """
             frame_idx = int(slider.val)
             update(frame_idx)
             fig.canvas.draw_idle()
@@ -123,8 +157,16 @@ class SimpleVisualizer:
         plt.show()
     
     def _plot_frame(self, ax_2d, ax_3d, frame):
-        """Plot a single frame of landmarks"""
-        # Plot pose landmarks
+        """
+        Plots the landmarks for a specific frame in both 2D and 3D views.
+        This function calls different helper functions to plot the body pose,
+        hand, and face landmarks for the given frame.
+        
+        Args:
+        ax_2d (matplotlib.axes.Axes): The 2D plot axis.
+        ax_3d (matplotlib.axes.Axes): The 3D plot axis.
+        frame (dict): The current frame's landmark data.
+        """
         if frame.get("pose_landmarks"):
             self._plot_pose(ax_2d, ax_3d, frame["pose_landmarks"])
         
@@ -140,8 +182,16 @@ class SimpleVisualizer:
             self._plot_face(ax_2d, ax_3d, frame["face_landmarks"])
     
     def _plot_pose(self, ax_2d, ax_3d, pose_landmarks):
-        """Plot pose landmarks"""
-        # Extract points
+        
+        """
+        Plots the body pose landmarks and their connections in both 2D and 3D views.
+        This function plots each landmark and connects them based on predefined pose connections.
+        
+        Args:
+        ax_2d (matplotlib.axes.Axes): The 2D plot axis.
+        ax_3d (matplotlib.axes.Axes): The 3D plot axis.
+        pose_landmarks (list): The list of pose landmarks to be plotted.
+        """
         points = np.array([[landmark["x"], landmark["y"], landmark["z"]]
                           for landmark in pose_landmarks])
         
@@ -166,7 +216,7 @@ class SimpleVisualizer:
                            color=self.colors["pose"])
     
     def _plot_hand(self, ax_2d, ax_3d, hand_landmarks, is_left=True):
-        """Plot hand landmarks"""
+       
         color = self.colors["left_hand"] if is_left else self.colors["right_hand"]
         
         # Extract points
@@ -194,8 +244,16 @@ class SimpleVisualizer:
                            color=color)
     
     def _plot_face(self, ax_2d, ax_3d, face_landmarks):
-        """Plot face landmarks"""
-        # Extract points
+        """
+    Plots the face landmarks in both 2D and 3D views.
+    The function extracts the (x, y, z) coordinates from the provided face landmarks and 
+    visualizes them in both 2D and 3D plots. It uses a predefined color for face landmarks (green).
+    
+    Args:
+    ax_2d (matplotlib.axes.Axes): The 2D plot axis.
+    ax_3d (matplotlib.axes.Axes): The 3D plot axis.
+    face_landmarks (list): The list of face landmarks to be plotted. Each landmark contains 'x', 'y', and 'z' coordinates.
+    """
         points = np.array([[landmark["x"], landmark["y"], landmark["z"]]
                           for landmark in face_landmarks])
         
